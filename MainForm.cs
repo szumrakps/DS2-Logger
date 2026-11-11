@@ -291,7 +291,7 @@ public sealed class MainForm : Form
         if (serial?.IsOpen != true) { MessageBox.Show("Najpierw połącz z portem COM."); return; }
         try {
             var clean = sendBox.Text.Replace("0x","",StringComparison.OrdinalIgnoreCase);
-            var parts = clean.Split(new[]{' ','\\t','\\r','\\n','-',','},StringSplitOptions.RemoveEmptyEntries);
+            var parts = clean.Split(new[] { ' ', '\\t', '\\r', '\\n', ';', ',', ':' }, StringSplitOptions.RemoveEmptyEntries);
             var data = parts.Select(p=>Convert.ToByte(p,16)).ToArray();
             serial.Write(data,0,data.Length);
             pendingEcho.AddRange(data);
