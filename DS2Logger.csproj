@@ -9,4 +9,7 @@
     <AssemblyName>DS2Logger</AssemblyName>
     <RootNamespace>DS2Logger</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="11.0.0" />
+  </ItemGroup>
 </Project>

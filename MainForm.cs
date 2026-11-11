@@ -1,4 +1,6 @@
 using System;
+using System.IO.Ports;
+using Timer = System.Windows.Forms.Timer;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
