@@ -1,0 +1,31 @@
+name: Build DS2 Logger Setup
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Download official USBPcap signed installer
+        shell: pwsh
+        run: |
+          Invoke-WebRequest 'https://github.com/desowin/usbpcap/releases/download/1.5.4.0/USBPcapSetup-1.5.4.0.exe' -OutFile 'USBPcapSetup-1.5.4.0.exe'
+          $expected='87a7edf9bbbcf07b5f4373d9a192a6770d2ff3add7aa1e276e82e38582ccb622'
+          $actual=(Get-FileHash 'USBPcapSetup-1.5.4.0.exe' -Algorithm SHA256).Hash.ToLower()
+          if($actual -ne $expected){ throw 'USBPcap SHA256 mismatch' }
+      - name: Publish application
+        run: dotnet publish DS2Logger.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+      - name: Build installer
+        run: iscc DS2LoggerSetup.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DS2-Logger-Setup
+          path: Output/DS2-Logger-Setup.exe
