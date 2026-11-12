@@ -22,5 +22,11 @@ Source: "USBPcapSetup-1.5.4.0.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Name: "{group}\DS2 Logger"; Filename: "{app}\DS2Logger.exe"
 Name: "{autodesktop}\DS2 Logger"; Filename: "{app}\DS2Logger.exe"
 [Run]
-Filename: "{tmp}\USBPcapSetup-1.5.4.0.exe"; Parameters: "/S"; StatusMsg: "Instalowanie sterownika USBPcap (wymagane do przechwytywania USB)..."; Flags: runhidden waituntilterminated
+Filename: "{tmp}\USBPcapSetup-1.5.4.0.exe"; Parameters: "/S"; StatusMsg: "Instalowanie sterownika USBPcap (wymagane do przechwytywania USB)..."; Flags: runhidden waituntilterminated; Check: not IsUsbPcapInstalled
 Filename: "{app}\DS2Logger.exe"; Description: "Uruchom DS2 Logger"; Flags: postinstall nowait skipifsilent
+
+[Code]
+function IsUsbPcapInstalled: Boolean;
+ begin
+   Result := RegKeyExists(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\USBPcap');
+ end;

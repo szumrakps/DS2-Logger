@@ -51,7 +51,7 @@ public static class UsbPcapImport
                     if(code==0) break;
                     byte[] val=br.ReadBytes(optLen);
                     if((optLen&3)!=0) fs.Position += 4-(optLen&3);
-                    if (code == 9 && val.Length > 1) resolution = val[0];
+                    if(code==9 && val.Length>=1) resolution=(val[0]&0x80)!=0 ? Pow2(val[0]&0x7f) : Pow10(val[0]);
                 }
                 interfaces.Add((resolution,link));
             }

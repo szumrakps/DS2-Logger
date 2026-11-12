@@ -1,6 +1,4 @@
 using System;
-using System.IO.Ports;
-using Timer = System.Windows.Forms.Timer;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -75,6 +73,7 @@ public sealed class MainForm : Form
         Controls.Add(output); Controls.Add(bottom); Controls.Add(options); Controls.Add(top);
         refreshTimer.Tick += (_,__) => { if (serial?.IsOpen == true) status.Text = $"Połączono • {serial.PortName} • {serial.BaudRate}"; };
         refreshTimer.Start();
+        usbLiveTimer.Tick += (_,__) => PollUsbCapture();
         FormClosing += (_,__) => { try { serial?.Close(); } catch {} StopUsbCapture(); };
     }
 
@@ -292,7 +291,7 @@ public sealed class MainForm : Form
         if (serial?.IsOpen != true) { MessageBox.Show("Najpierw połącz z portem COM."); return; }
         try {
             var clean = sendBox.Text.Replace("0x","",StringComparison.OrdinalIgnoreCase);
-            var parts = clean.Split(new[] { ' ', '\t', '\r', '\n', ';', ',', ':' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = clean.Split(new[]{' ','\\t','\\r','\\n','-',','},StringSplitOptions.RemoveEmptyEntries);
             var data = parts.Select(p=>Convert.ToByte(p,16)).ToArray();
             serial.Write(data,0,data.Length);
             pendingEcho.AddRange(data);

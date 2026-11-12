@@ -42,3 +42,10 @@ W GUI dodano start/stop USBPcapCMD:
 
 ## Dekodowanie USBPcap PCAP (implementacja)
 Dodano `Dekoduj USB PCAP`: odczytuje klasyczny PCAP z link type 249 (USBPcap), analizuje nagłówek USBPcap (27+ bajtów), wyciąga payload transferów BULK, pokazuje USB-IN/USB-OUT wraz z urządzeniem i endpointem oraz wyszukuje ramki DS2 (`0x12`, następny bajt = długość). To jest dekoder pliku PCAP, nie jeszcze strumieniowanie ramek DS2 z capture w czasie rzeczywistym. Dla adapterów USB-UART payload może być opakowany protokołem producenta (np. FTDI), więc w razie potrzeby trzeba odfiltrować jego nagłówek przed DS2.
+
+
+## Ważne dla MS4X (tryb pasywny)
+
+Nie klikaj „Połącz” przy COM — to otwiera port szeregowy i blokuje MS4X. Do przechwytywania wybierz USBPcap1/2/… i kliknij „Start USB capture”; MS4X ma być właścicielem portu COM. Logger otwiera urządzenie USBPcap, nie port adaptera. Uruchamiaj logger jako administrator (manifest wymusza podniesienie uprawnień).
+
+Instalator pomija instalację USBPcap, jeśli jego wpis znajduje się w rejestrze Windows. Nie odinstalowuje istniejącego sterownika.
