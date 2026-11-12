@@ -36,16 +36,16 @@ public sealed class MainForm : Form
     private UsbPcapNative? nativeCapture;
     private CancellationTokenSource? captureCts;
     private readonly List<byte> capturePending = new();
-    private readonly Timer usbLiveTimer = new() { Interval = 500 };
+    private readonly System.Windows.Forms.Timer usbLiveTimer = new() { Interval = 500 };
     private long usbReadOffset;
     private string? usbCapturePath;
     private readonly Label status = new() { Text = "Rozłączono", AutoSize = true, ForeColor = Color.Firebrick };
-    private SerialPort? serial;
+    private System.IO.Ports.SerialPort? serial;
     private readonly List<byte> rxBuffer = new();
     private readonly List<byte> pendingEcho = new();
     private readonly StringBuilder logText = new();
     private bool suppressEcho;
-    private readonly Timer refreshTimer = new() { Interval = 1000 };
+    private readonly System.Windows.Forms.Timer refreshTimer = new() { Interval = 1000 };
 
     public MainForm()
     {
@@ -73,14 +73,13 @@ public sealed class MainForm : Form
         Controls.Add(output); Controls.Add(bottom); Controls.Add(options); Controls.Add(top);
         refreshTimer.Tick += (_,__) => { if (serial?.IsOpen == true) status.Text = $"Połączono • {serial.PortName} • {serial.BaudRate}"; };
         refreshTimer.Start();
-        usbLiveTimer.Tick += (_,__) => PollUsbCapture();
         FormClosing += (_,__) => { try { serial?.Close(); } catch {} StopUsbCapture(); };
     }
 
     private void RefreshPorts()
     {
         var selected = ports.SelectedItem?.ToString();
-        ports.Items.Clear(); ports.Items.AddRange(SerialPort.GetPortNames().OrderBy(x=>x).Cast<object>().ToArray());
+        ports.Items.Clear(); ports.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames().OrderBy(x=>x).Cast<object>().ToArray());
         if (selected != null && ports.Items.Contains(selected)) ports.SelectedItem = selected;
         else if (ports.Items.Count > 0) ports.SelectedIndex = 0;
     }
@@ -90,17 +89,17 @@ public sealed class MainForm : Form
         if (serial?.IsOpen == true) { serial.Close(); connect.Text = "Połącz"; status.Text = "Rozłączono"; status.ForeColor = Color.Firebrick; return; }
         if (ports.SelectedItem == null) { MessageBox.Show("Wybierz port COM."); return; }
         try {
-            serial = new SerialPort(ports.SelectedItem.ToString()!, int.Parse(baud.SelectedItem!.ToString()!), Parity.None, 8, StopBits.One) { ReadTimeout=500, WriteTimeout=1000, DtrEnable=false, RtsEnable=false };
+            serial = new System.IO.Ports.SerialPort(ports.SelectedItem.ToString()!, int.Parse(baud.SelectedItem!.ToString()!), Parity.None, 8, StopBits.One) { ReadTimeout=500, WriteTimeout=1000, DtrEnable=false, RtsEnable=false };
             serial.DataReceived += SerialDataReceived; serial.Open();
             connect.Text = "Rozłącz"; status.Text = "Połączono"; status.ForeColor = Color.LightGreen;
             AddLine("INFO", $"Otwarto {serial.PortName} @ {serial.BaudRate}");
         } catch (Exception ex) { MessageBox.Show("Nie można otworzyć portu: " + ex.Message); }
     }
 
-    private void SerialDataReceived(object? sender, SerialDataReceivedEventArgs e)
+    private void SerialDataReceived(object? sender, System.IO.Ports.SerialDataReceivedEventArgs e)
     {
         try {
-            var sp = (SerialPort)sender!;
+            var sp = (System.IO.Ports.SerialPort)sender!;
             var n = sp.BytesToRead; if (n <= 0) return;
             var bytes = new byte[n]; sp.Read(bytes,0,n);
             BeginInvoke(() => ProcessRx(bytes));
